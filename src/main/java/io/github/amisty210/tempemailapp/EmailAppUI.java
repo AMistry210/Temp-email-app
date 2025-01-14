@@ -20,7 +20,7 @@ public class EmailAppUI extends Application {
     @Override
     public void start(Stage stage) {
         emailApp = new TemporaryEmailApp();
-        emailApp.refreshApp();
+        emailApp.loadEmails(); // Load saved emails if any
 
         inboxView = new ListView<>();
         updateInboxView();
@@ -28,18 +28,16 @@ public class EmailAppUI extends Application {
         emailContentArea = new TextArea();
         emailContentArea.setEditable(false);
 
+        // Refresh button
         Button refreshButton = new Button("Refresh");
         refreshButton.setOnAction(event -> refreshApp());
 
-        inboxView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                int index = inboxView.getSelectionModel().getSelectedIndex();
-                showEmailContent(index);
-            }
-        });
+        // Send button
+        Button sendButton = new Button("Send Email");
+        sendButton.setOnAction(event -> sendEmail());
 
         // Layout
-        VBox layout = new VBox(10, inboxView, emailContentArea, refreshButton);
+        VBox layout = new VBox(10, inboxView, emailContentArea, refreshButton, sendButton);
         Scene scene = new Scene(layout, 400, 300);
 
         stage.setTitle("Temporary Email App");
@@ -51,6 +49,12 @@ public class EmailAppUI extends Application {
         emailApp.refreshApp();
         updateInboxView();
         emailContentArea.clear();
+        emailApp.saveEmails(); // Save after refresh
+    }
+
+    private void sendEmail() {
+        emailApp.sendEmail("Subject: New Email", "This is the body of the new email.");
+        updateInboxView(); // Refresh inbox after sending email
     }
 
     private void showEmailContent(int index) {
